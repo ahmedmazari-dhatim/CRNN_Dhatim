@@ -33,20 +33,18 @@ parser.add_argument('--valroot', required=True, help='path to dataset')
 
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
 parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
-#parser.add_argument('--imgH', type=int, default=64, help='the height / width of the input image to network')
+
 parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
 parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-#parser.add_argument('--nh', type=int, default=100, help='size of the lstm hidden state')
+
 parser.add_argument('--nh', type=int, default=256, help='size of the lstm hidden state')
 parser.add_argument('--niter', type=int, default=13, help='number of epochs to train for')
-#parser.add_argument('--lr', type=float, default=1, help='learning rate for Critic, default=0.05')
 parser.add_argument('--lr', type=float, default=1.0, help='learning rate for Critic, default=0.00005')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--crnn', default='', help="path to crnn (to continue training)")
 parser.add_argument('--alphabet', type=str, default=str1)
-#parser.add_argument('--Diters', type=int, default=5, help='number of D iters per each G iter')
 parser.add_argument('--experiment', default=None, help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=1, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=1, help='Number of samples to display when test')
@@ -60,7 +58,7 @@ opt = parser.parse_args()
 print(opt)
 
 if opt.experiment is None:
-    #opt.experiment = 'samples'
+    
     opt.experiment = 'expr'
 os.system('mkdir {0}'.format(opt.experiment))
 
@@ -86,7 +84,7 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=opt.batchSize,
     shuffle=True, sampler=sampler,
     num_workers=int(opt.workers),
-    #collate_fn=dataset.alignCollate(imgH=opt.imgH, keep_ratio=opt.keep_ratio))
+    
     collate_fn=dataset.alignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keep_ratio))
 test_dataset = dataset.lmdbDataset(
     root=opt.valroot, transform=dataset.resizeNormalize((100, 32)))
@@ -123,10 +121,6 @@ if opt.crnn != '':
     crnn.load_state_dict(model_dict)
 print(crnn)
 
-#if opt.crnn != '':
-#    print('loading pretrained model from %s' % opt.crnn)
-    #crnn.load_state_dict(torch.load(opt.crnn))
-#print(crnn)
 
 image = torch.FloatTensor(opt.batchSize, 3, opt.imgH, opt.imgH)
 text = torch.IntTensor(opt.batchSize * 5)
@@ -154,7 +148,7 @@ else:
     optimizer = optim.RMSprop(crnn.parameters(), lr=opt.lr)
 
 
-def val(net, dataset, criterion, max_iter=1):
+def val(net, dataset, criterion, max_iter=100):
     print('Start val')
 
     for p in crnn.parameters():
@@ -170,7 +164,7 @@ def val(net, dataset, criterion, max_iter=1):
     loss_avg = utils.averager()
     max_iter = min(max_iter, len(data_loader))
     for i in range(max_iter):
-    #for i in range(max_iter):
+    
         data = val_iter.next()
         i += 1
         cpu_images, cpu_texts = data
@@ -193,7 +187,7 @@ def val(net, dataset, criterion, max_iter=1):
             if pred == target.lower():
                 n_correct += 1
 
-    #raw_preds = converter.decode(preds.data, preds_size.data, raw=True)
+  
     raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[:opt.n_test_disp]
     for raw_pred, pred, gt in zip(raw_preds, sim_preds, cpu_texts):
         print('%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt))
@@ -201,7 +195,7 @@ def val(net, dataset, criterion, max_iter=1):
     accuracy = n_correct / float(max_iter * opt.batchSize)
     print('Test loss: %f, accuray: %f' % (loss_avg.val(), accuracy))
     print('number of correct ', n_correct)
-    #arr=preds.data.numpy()
+    
     return loss_avg.val(),accuracy
 
 
@@ -223,23 +217,14 @@ def trainBatch(net, criterion, optimizer):
     crnn.zero_grad()
     cost.backward()
     optimizer.step()
-    #_, preds = preds.max(2)
-    # preds = preds.squeeze(2)
-    #preds = preds.transpose(1, 0).contiguous().view(-1)
-    #sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
-    #n_correct=0
-    #for pred, target in zip(sim_preds, cpu_texts):
-     #   if pred == target.lower():
-      #      n_correct += 1
-    #accuracy = n_correct / float(opt.batchSize)
-    return cost # ,accuracy
+
+    return cost 
 
 
 
 g_i= []
 g_train_loss= []
 g_valid_loss=[]
-#g_train_accuracy=[]
 g_valid_accuracy=[]
 g_iter=[]
 g_iter_valid=[]
@@ -281,21 +266,18 @@ for epoch in range(opt.niter):
 
 
         i += 1
-        #g_i = np.append(g_i, epoch)
-        #g_train_loss = np.append(g_train_loss, loss_avg.val())
-        #g_train_accuracy = np.append(g_train_accuracy,accuracy_train)
+
 
         if i % opt.displayInterval == 0:
 
             print('[%d/%d][%d/%d] Loss: %f' %
                   (epoch, opt.niter, i, len(train_loader), loss_avg.val()))
             loss_avg.reset()
-            #print('train_accuracy is : ',accuracy_train)
+
 
         if i % opt.valInterval == 0:
             cost_val,accuracy_valid=val(crnn, test_dataset, criterion)
-            #g_valid_loss = np.append(g_valid_loss, cost_val)
-            #g_valid_accuracy = np.append(g_valid_accuracy, accuracy_valid)
+      
 
         # do checkpointing
         if i % opt.saveInterval == 0:
@@ -307,7 +289,6 @@ for epoch in range(opt.niter):
     g_i = np.append(g_i, epoch)
     g_train_loss = np.append(g_train_loss,x)
 
-    #g_train_accuracy = np.append(g_train_accuracy, accuracy_train)
     g_valid_loss = np.append(g_valid_loss, cost_val)
 
     g_valid_accuracy = np.append(g_valid_accuracy, accuracy_valid)              
@@ -315,9 +296,7 @@ for epoch in range(opt.niter):
     c=b-a
     print(c,"estimated time")
     print(c.total_seconds(),"in second")
-#print("valid_acc ",g_valid_accuracy)
-#print("train_loss ",g_train_loss)
-#print("valid_loss ",g_valid_loss)
+
 
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots()
@@ -333,20 +312,15 @@ ax1.set_xlabel("epoch")
 ax1.set_ylabel("loss")
 ax1.set_title(" loss on CRNN  traind with abby digit ")
 ax1.legend(loc='best')
-#ax1.xlabel("epoch")
-#ax1.ylabel("loss")
-#f1=ax1.figure()
+
 fig1.savefig(opt.experiment+'/try_loss.png', bbox_inches='tight')
 
-#ax2.plot(g_i,g_train_accuracy,label='train_acc')
+
 ax2.plot(g_i,g_valid_accuracy,label='valid_acc')
 ax2.set_xlabel("epoch")
 ax2.set_ylabel("accuracy")
-ax2.set_title(" loss on CRNN  traind abbyy digit ")
+ax2.set_title(" loss on CRNN ")
 ax2.legend(loc='best')
-#ax2.xlabel("epoch")
-#ax2.ylabel("accuracy")
-#f2=ax2.figure()
 fig2.savefig(opt.experiment+'/try_acc.png', bbox_inches='tight')
 
 ax3.plot(g_i,g_valid_loss,label='valid_acc')
@@ -366,16 +340,13 @@ ax4.set_title(" train and valid loss on first  epoch ")
 ax4.legend(loc='best')
 fig4.savefig(opt.experiment+'/train_valid_loss_first_epoch.png', bbox_inches='tight')
 
-#print('g last epoch',g_iter_last_epoch)
-#print('loss train last epoch',g_iter_train_last_epoch)
-#print('loss train last epoch',g_iter_valid_last_epoch)
 ax5.plot(g_iter_last_epoch,g_iter_train_last_epoch,label='train_loss')
 ax5.plot(g_iter_last_epoch,g_iter_valid_last_epoch,label='valid_loss')
 ax5.set_xlabel("iterations")
 ax5.set_ylabel("loss")
 ax5.set_title(" loss on train and validation last epoch ")
 ax5.legend(loc='best')
-fig5.savefig(opt.experiment+'/output_transfer_final/train_valid_loss_last_epoch.png', bbox_inches='tight')
+fig5.savefig(opt.experiment+'/train_valid_loss_last_epoch.png', bbox_inches='tight')
 
 
 ax6.plot(g_iter_last_epoch,g_iter_valid,label='valid_loss_first_epoch')
