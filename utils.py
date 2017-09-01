@@ -21,7 +21,7 @@ class strLabelConverter(object):
             # NOTE: 0 is reserved for 'blank' required by wrap_ctc
             self.dict[char] = i + 1
 
-    def is_chinese(self, uchar):
+    def is_all(self, uchar):
 
 
         alnum = np.array([ch.isalnum() for ch in uchar])
@@ -34,7 +34,7 @@ class strLabelConverter(object):
         length = []
         result = []
         for item in text:
-            if self.is_chinese(item):
+            if self.is_all(item):
                 item = unicode(item, 'utf-8')
             length.append(len(item))
             for char in item:
