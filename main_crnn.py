@@ -185,7 +185,7 @@ def val(net, dataset, criterion, max_iter=100):
         preds = preds.transpose(1, 0).contiguous().view(-1)
         sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
         for pred, target in zip(sim_preds, cpu_texts):
-            if pred == target.lower():
+            if pred == target.lower():  # pred==target: when we add UpperCase letters
                 n_correct += 1
 
     raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[:opt.n_test_disp]
