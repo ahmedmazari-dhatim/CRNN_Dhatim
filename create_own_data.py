@@ -4,17 +4,15 @@ import cv2
 import numpy as np
 import glob
 import pandas as pd
-# real_path='/home/ahmed/Downloads/sample/train/'
+
 path_train='/home/ahmed/Pictures/cogedis/24072017/all/'
-#path_train='/home/ahmed/Pictures/cogedis/cogedis_words_3/'
-#path_valid='/home/ahmed/Pictures/cogedis/cogedis_words_3/'
+
 path_valid='/home/ahmed/Pictures/cogedis/24072017/all/'
 
 path_output_train = '/home/ahmed/Pictures/cogedis/24072017/maj+min/train/'
 path_output_valid=  '/home/ahmed/Pictures/cogedis/24072017/maj+min/valid/'
 
 
-#df = pd.read_csv('/home/ahmed/Pictures/cogedis/data_crnn/augmented_train_digit_alpha.csv',sep=',')
 
 df = pd.read_csv('/home/ahmed/Pictures/cogedis/24072017/maj+min/all_maj_min_train.csv',sep=',')
 df = df.astype(str)
@@ -51,14 +49,6 @@ for img in set_img_valid:
         images_valid.append(image)
 valid_img=images_valid
 valid_label=labels_valid
-'''
-
-#Test
-os.chdir(path+path_test)
-images_test = glob.glob("*.jpg")
-left_test,labels_test,right_test = list(zip(*[os.path.splitext(x)[0].split('_')
-                                     for x in images_test]))
-'''
 
 
 def checkImageIsValid(imageBin):
@@ -132,4 +122,3 @@ if __name__ == '__main__':
 
 
 
-#python2 main_transfer.py --trainroot="/home/ahmed/Pictures/cogedis/24072017/split/digit+char/model/train" --valroot="/home/ahmed/Pictures/cogedis/24072017/split/digit+char/model/valid" --imgH=32  --niter=8 --cuda  --crnn="/home/ahmed/Downloads/crnn.pytorch-master/data/crnn.pth"  --alphabet="0123456789,:%'.+-" --adadelta  --experiment="/home/ahmed/Pictures/cogedis/24072017/split/digit+char/model/output_transfer_learning"
