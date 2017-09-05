@@ -74,9 +74,10 @@ for img in images_names:
             return np.exp(z-np.max(z,0))/np.sum(np.exp(z-np.max(z,0)),0.)
         #Transform logits to probabilities
         # we first define softmax function 
-        preds=preds.cpu().data.numpy()
-        preds=preds.squeeze()
-        preds_proba=softmax(preds)
+        logits=preds
+        logits=logits.cpu().data.numpy()
+        logits=preds.squeeze()
+        preds_proba=softmax(logits)
         '''
         temps=preds.cpu()
         _, preds = preds.max(2)
