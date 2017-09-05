@@ -15,7 +15,15 @@ import glob
 import os
 import pandas as pd
 
-
+'''
+alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-,':.+%"
+alphabet="abcdefghijklmnopqrstuvwxyz0123456789'/-,:.+%"
+alphabet="abcdefghijklmnopqrstuvwxyz0123456789"
+alphabet="abcdefghijklmnopqrstuvwxyz'/-,:.+%"
+alphabet="abcdefghijklmnopqrstuvwxyz"
+alphabet="0123456789"
+alphabet="0123456789'/-,:.+%"
+'''
 
 df = pd.read_csv('/home/ahmed/Pictures/cogedis/24072017/split/all/all_processed_clean.csv',sep=",")
 
